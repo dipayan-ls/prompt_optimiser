@@ -1,0 +1,5 @@
+{
+  "name": "Prompt Token Optimizer",
+  "description": "Analyze and optimize prompts for minimal token usage across Gemini, Claude, and ChatGPT.",
+  "requestFramePermissions": []
+}
