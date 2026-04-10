@@ -102,7 +102,20 @@ export default function App() {
            - Use XML format for complex tasks requiring clear sectioning, multi-step instructions, or structured document generation.
            - Use Plain Text for research-based prompts, general questions, or simple conversational tasks.
         4. Estimate the percentage of input tokens saved by your optimized prompt (should not exceed ~55%).
-        5. Provide 3 advanced, highly impactful, and novel prompt engineering insights specific to this prompt. Avoid generic advice like "remove please" or "be specific". Teach advanced techniques (e.g., XML tagging, few-shot framing, chain-of-thought structuring, role-prompting nuances, information density) so the user learns something new and powerful every time.`,
+        5. Provide 3-5 advanced, highly impactful, and novel prompt engineering insights specific to this prompt. 
+           Incorporate and teach the following expert techniques where relevant to this specific task:
+           - Chain-of-Thought (CoT): Guide the model to reason step-by-step.
+           - Few-Shot Prompting: Provide clear illustrative examples.
+           - Role + Context Framing: Establish a high-authority persona and rich situation.
+           - XML / Structural Tagging: Use tags like <instructions> or <context> for clarity.
+           - Negative Prompting: Explicitly list what NOT to do.
+           - Self-Consistency: Ask for multiple paths and a final selection.
+           - Skeleton / Scaffolded Prompting: Provide a template for the output.
+           - Constraint Layering: Stack requirements in priority order.
+           - Meta-Prompting: Direct the model to improve its own instructions.
+           - Iterative Refinement: Have the model critique and rewrite its initial draft.
+           - Persona Anchoring with Stakes: Assign specific consequences to performance.
+           - Output Format Specification: Use strict format schemas.`,
         config: {
           thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
           responseMimeType: 'application/json',
@@ -138,12 +151,79 @@ export default function App() {
       if (response.text) {
         const parsedResult = JSON.parse(response.text) as AnalysisResult;
         setItems(prev => prev.map(i => i.id === id ? { ...i, isAnalyzing: false, result: parsedResult } : i));
+        
+        // Save to recommendations.md incrementally
+        saveRecommendationToGit(item.name, parsedResult.recommendations);
       } else {
         throw new Error("Failed to generate analysis.");
       }
     } catch (err: any) {
       console.error(err);
       setItems(prev => prev.map(i => i.id === id ? { ...i, isAnalyzing: false, error: err.message || "An error occurred while analyzing the prompt." } : i));
+    }
+  };
+
+  const saveRecommendationToGit = async (promptName: string, recommendations: string[]) => {
+    const token = process.env.VITE_GITHUB_TOKEN;
+    const repo = process.env.VITE_GITHUB_REPO;
+    const filePath = process.env.VITE_RECO_FILE_PATH || 'recommendations.md';
+
+    if (!token || !repo || token === "your_github_personal_access_token") {
+      console.warn("GitHub storage not configured: Set VITE_GITHUB_TOKEN and VITE_GITHUB_REPO in .env");
+      return;
+    }
+
+    try {
+      const apiUrl = `https://api.github.com/repos/${repo}/contents/${filePath}`;
+      
+      // 1. Get current file content (if exists)
+      let currentContent = "";
+      let sha = "";
+      
+      const res = await fetch(apiUrl, {
+        headers: { 
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        currentContent = decodeURIComponent(escape(atob(data.content)));
+        sha = data.sha;
+      }
+
+      // 2. Prepare new entry
+      const timestamp = new Date().toLocaleString('en-US', { 
+        timeZone: 'UTC', 
+        dateStyle: 'medium', 
+        timeStyle: 'short' 
+      });
+      
+      const newEntry = `\n## [${promptName}] - ${timestamp} UTC\n\n` + 
+        recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n') + 
+        "\n\n---\n";
+
+      const updatedContent = currentContent + newEntry;
+
+      // 3. Update file
+      await fetch(apiUrl, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/vnd.github.v3+json'
+        },
+        body: JSON.stringify({
+          message: `Update recommendations for ${promptName}`,
+          content: btoa(unescape(encodeURIComponent(updatedContent))),
+          sha: sha || undefined
+        })
+      });
+      
+      console.log(`Stored ${recommendations.length} recommendations to ${filePath}`);
+    } catch (err) {
+      console.error("Failed to sync recommendations to GitHub:", err);
     }
   };
 
