@@ -2,6 +2,8 @@ import { useState, useRef } from 'react';
 import { GoogleGenAI, Type, ThinkingLevel } from '@google/genai';
 import { Loader2, Sparkles, Zap, ArrowRight, Copy, CheckCircle2, AlertCircle, TrendingDown, Upload, Plus, FileText, Trash2 } from 'lucide-react';
 import { cn } from './lib/utils';
+import { EnhancementsSidebar } from './components/EnhancementsSidebar';
+import { MethodologyAccordion } from './components/MethodologyAccordion';
 
 interface AnalysisResult {
   analysis: {
@@ -73,6 +75,16 @@ export default function App() {
 
   const handleContentChange = (id: string, newContent: string) => {
     setItems(prev => prev.map(i => i.id === id ? { ...i, content: newContent, result: null, error: null } : i));
+  };
+
+  const handleSelectEnhancement = (template: string) => {
+    if (activeId) {
+      handleContentChange(activeId, template);
+    } else {
+      const newId = Math.random().toString(36).substring(7);
+      setItems(prev => [...prev, { id: newId, name: `New Prompt`, content: template, isAnalyzing: false }]);
+      setActiveId(newId);
+    }
   };
 
   const handleAnalyze = async (id: string) => {
@@ -250,12 +262,12 @@ export default function App() {
     <div className="min-h-screen bg-[#f5f5f5] text-slate-900 font-sans selection:bg-blue-200 flex flex-col">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shrink-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-xl font-semibold tracking-tight">Token Optimizer</h1>
+            <h1 className="text-xl font-semibold tracking-tight">PromptCraft Optimizer</h1>
           </div>
           <div className="text-sm font-medium text-slate-500 flex items-center gap-1.5">
             Powered by <Sparkles className="w-4 h-4 text-blue-500" /> Gemini 3.1 Pro
@@ -263,12 +275,19 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row gap-8 overflow-hidden h-[calc(100vh-4rem)]">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row gap-6 overflow-hidden h-[calc(100vh-4rem)]">
         
-        {/* Left Sidebar: File Queue */}
-        <div className="w-full lg:w-80 flex flex-col gap-4 shrink-0 h-full">
-          <div className="flex items-center justify-between shrink-0">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">Your Prompts</h2>
+        {/* Left Column: Sidebar & File Queue */}
+        <div className="w-full lg:w-[22rem] flex flex-col gap-6 shrink-0 h-full">
+          {/* Enhancements Library */}
+          <div className="flex-1 bg-white border border-slate-200 rounded-2xl p-4 overflow-hidden shadow-sm">
+            <EnhancementsSidebar onSelectEnhancement={handleSelectEnhancement} />
+          </div>
+
+          {/* File Queue */}
+          <div className="h-[35%] bg-white border border-slate-200 rounded-2xl p-4 flex flex-col gap-4 shadow-sm shrink-0">
+            <div className="flex items-center justify-between shrink-0">
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">Your Prompts</h2>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => fileInputRef.current?.click()}
@@ -331,13 +350,17 @@ export default function App() {
               ))
             )}
           </div>
+          </div>
         </div>
 
-        {/* Right Content: Active Item Details */}
-        <div className="flex-1 flex flex-col min-w-0 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden h-full">
+        {/* Center Column: Input & Configuration */}
+        <div className="flex-1 min-w-[400px] flex flex-col h-full overflow-hidden">
+          <MethodologyAccordion />
+          
+          <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
           {activeItem ? (
             <div className="flex-1 overflow-y-auto p-6">
-              <div className="max-w-3xl mx-auto space-y-8 pb-8">
+              <div className="space-y-6">
                 
                 {/* Input Section */}
                 <div className="space-y-4">
@@ -380,10 +403,27 @@ export default function App() {
                     </div>
                   )}
                 </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
+              <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                <FileText className="w-8 h-8 text-slate-400" />
+              </div>
+              <h3 className="text-lg font-medium text-slate-900 mb-2">No Prompt Selected</h3>
+              <p className="text-sm text-slate-500 max-w-sm">
+                Select a prompt from the sidebar, create a new one, or upload .txt/.md files to begin analysis.
+              </p>
+            </div>
+          )}
+          </div>
+        </div>
 
-                {/* Results Section */}
-                {activeItem.result && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-8 border-t border-slate-100 pt-8">
+        {/* Right Column: Output & Intelligence Panel */}
+        <div className="w-full lg:w-[32rem] shrink-0 flex flex-col min-w-0 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden h-full">
+          {activeItem && activeItem.result ? (
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     
                     {/* Token Estimates Grid */}
                     <div>
@@ -459,19 +499,16 @@ export default function App() {
                         ))}
                       </ul>
                     </div>
-
+                    </div>
                   </div>
-                )}
-              </div>
-            </div>
-          ) : (
+            ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
               <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
-                <FileText className="w-8 h-8 text-slate-400" />
+                <Zap className="w-8 h-8 text-slate-400" />
               </div>
-              <h3 className="text-lg font-medium text-slate-900 mb-2">No Prompt Selected</h3>
+              <h3 className="text-lg font-medium text-slate-900 mb-2">Awaiting Generation</h3>
               <p className="text-sm text-slate-500 max-w-sm">
-                Select a prompt from the sidebar, create a new one, or upload .txt/.md files to begin analysis.
+                Provide context and click Generate in the middle column to see your optimized prompt and token savings here.
               </p>
             </div>
           )}
