@@ -4,8 +4,10 @@ import {
   AlertTriangle,
   ArrowRight,
   CheckCircle2,
+  ClipboardCheck,
   Copy,
   FileText,
+  HelpCircle,
   Loader2,
   Plus,
   Sparkles,
@@ -178,6 +180,23 @@ export default function App() {
     analysis && selectedTokens
       ? savingsPercent(analysis.originalTokens[0].tokens, selectedTokens[0].tokens)
       : 0;
+
+  /**
+   * Growth is the intended outcome in Engineer mode — the added tokens are the
+   * specificity being bought. Reporting that as "900% more tokens" in the same
+   * red-flag style used for accidental bloat would misread the tool's own work,
+   * so state the multiple plainly instead.
+   */
+  const growthFactor =
+    analysis && selectedTokens && analysis.originalTokens[0].tokens > 0
+      ? selectedTokens[0].tokens / analysis.originalTokens[0].tokens
+      : 1;
+  const tokenBadge =
+    savings > 0
+      ? { text: `${savings}% fewer tokens`, good: true }
+      : growthFactor >= 1.5
+        ? { text: `${growthFactor.toFixed(1)}× more detail`, good: false }
+        : { text: `${Math.abs(savings)}% more tokens`, good: false };
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] text-slate-900 font-sans selection:bg-blue-200 flex flex-col">
@@ -461,18 +480,23 @@ export default function App() {
                       <span className="ml-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-300 rounded-md border border-slate-700">
                         {selected.optimizedFormat}
                       </span>
+                      {analysis.response.taskType !== 'other' && (
+                        <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-blue-500/15 text-blue-300 rounded-md border border-blue-500/30">
+                          {analysis.response.taskType}
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-3">
                       <span
                         className={cn(
                           'text-xs font-medium flex items-center gap-1 px-2 py-1 rounded-full',
-                          savings > 0
+                          tokenBadge.good
                             ? 'text-emerald-400 bg-emerald-400/10'
                             : 'text-slate-400 bg-slate-400/10',
                         )}
                       >
                         <TrendingDown className="w-3 h-3" />
-                        {savings > 0 ? `${savings}% fewer tokens` : `${Math.abs(savings)}% more tokens`}
+                        {tokenBadge.text}
                       </span>
                       <button
                         onClick={() => handleCopy(selected.optimizedPrompt)}
@@ -498,6 +522,51 @@ export default function App() {
                     </div>
                   )}
                 </div>
+
+                {/* Assumptions are the safety mechanism for invented detail:
+                    engineering a vague prompt requires inventing specifics, and
+                    an invented specific the user never reviews is a liability. */}
+                {analysis.response.assumptions.length > 0 && (
+                  <div className="bg-amber-50/60 rounded-xl border border-amber-200 p-5">
+                    <h3 className="text-sm font-semibold text-amber-900 mb-1 flex items-center gap-2">
+                      <ClipboardCheck className="w-4 h-4 text-amber-600" />
+                      Assumptions made — check these
+                    </h3>
+                    <p className="text-xs text-amber-800/80 mb-3 leading-relaxed">
+                      These details weren't in your prompt. They were added to make it specific. Correct
+                      anything wrong before you use the result.
+                    </p>
+                    <ul className="space-y-2">
+                      {analysis.response.assumptions.map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-2.5 text-sm text-amber-900">
+                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                          <span className="leading-relaxed">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {analysis.response.openQuestions.length > 0 && (
+                  <div className="bg-slate-50 rounded-xl border border-slate-200 p-5">
+                    <h3 className="text-sm font-semibold text-slate-800 mb-1 flex items-center gap-2">
+                      <HelpCircle className="w-4 h-4 text-slate-500" />
+                      Still ambiguous
+                    </h3>
+                    <p className="text-xs text-slate-500 mb-3 leading-relaxed">
+                      No sensible default exists for these. Answer them in your prompt and re-run for a
+                      sharper result.
+                    </p>
+                    <ul className="space-y-2">
+                      {analysis.response.openQuestions.map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-2.5 text-sm text-slate-600">
+                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+                          <span className="leading-relaxed">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 {analysis.response.recommendations.length > 0 && (
                   <div className="bg-blue-50/50 rounded-xl border border-blue-100 p-5">

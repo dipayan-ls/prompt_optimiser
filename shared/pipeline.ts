@@ -2,9 +2,9 @@ import { ruleBasedOptimize } from './ruleBased';
 import {
   AdapterError,
   DEFAULT_OPTIONS,
-  LENGTH_MODES,
+  INTENSITIES,
   TONES,
-  type LengthMode,
+  type Intensity,
   type ModelAdapter,
   type OptimizeOptions,
   type OptimizeRequest,
@@ -57,9 +57,9 @@ export function parseRequest(body: unknown): OptimizeRequest {
     ? (record.tone as Tone)
     : DEFAULT_OPTIONS.tone;
 
-  const length = (LENGTH_MODES as readonly string[]).includes(record.length as string)
-    ? (record.length as LengthMode)
-    : DEFAULT_OPTIONS.length;
+  const intensity = (INTENSITIES as readonly string[]).includes(record.intensity as string)
+    ? (record.intensity as Intensity)
+    : DEFAULT_OPTIONS.intensity;
 
   const rawVariations = Number(record.variations);
   const variations = Number.isFinite(rawVariations)
@@ -70,7 +70,7 @@ export function parseRequest(body: unknown): OptimizeRequest {
   const previousPrompt =
     typeof record.previousPrompt === 'string' ? record.previousPrompt.slice(0, 48_000) : undefined;
 
-  return { prompt, tone, length, variations, feedback, previousPrompt };
+  return { prompt, tone, intensity, variations, feedback, previousPrompt };
 }
 
 function degradedResult(prompt: string, options: OptimizeOptions, reason: string): OptimizeResponse {

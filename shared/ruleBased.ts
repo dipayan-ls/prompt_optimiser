@@ -1,4 +1,4 @@
-import type { LengthMode, ModelResult, OptimizeOptions, PromptFormat, Variation } from './types';
+import type { Intensity, ModelResult, OptimizeOptions, PromptFormat, Variation } from './types';
 
 /**
  * Deterministic optimizer. This is the floor: it runs when every model backend
@@ -136,9 +136,9 @@ function findGaps(text: string): Gaps {
   };
 }
 
-function chooseFormat(text: string, length: LengthMode): PromptFormat {
+function chooseFormat(text: string, intensity: Intensity): PromptFormat {
   if (/\b(api|json|payload|schema|endpoint|serializ)/i.test(text)) return 'JSON';
-  if (length === 'shorten') return 'Text';
+  if (intensity === 'compress') return 'Text';
   const bullets = toBullets(text);
   return bullets.length >= 3 ? 'XML' : 'Text';
 }
@@ -222,10 +222,10 @@ export function ruleBasedOptimize(prompt: string, options: OptimizeOptions): Mod
   const compressed = compressFiller(original);
   const gaps = findGaps(compressed);
   const bullets = toBullets(compressed);
-  const format = chooseFormat(compressed, options.length);
+  const format = chooseFormat(compressed, options.intensity);
 
   let optimizedPrompt: string;
-  if (options.length === 'shorten' || format === 'Text') {
+  if (options.intensity === 'compress' || format === 'Text') {
     optimizedPrompt = compressed;
   } else if (format === 'JSON') {
     optimizedPrompt = buildJson(bullets, gaps, options.tone);
@@ -241,7 +241,16 @@ export function ruleBasedOptimize(prompt: string, options: OptimizeOptions): Mod
   };
 
   return {
+    // Classifying intent needs a model; regexes cannot do it honestly.
+    taskType: 'other',
     variations: [variation],
+    // The offline path invents nothing, so it has nothing to disclose. Engineer
+    // mode is precisely what it cannot deliver — the UI's degraded banner says so.
+    assumptions: [],
+    openQuestions:
+      options.intensity === 'engineer'
+        ? ['Engineering a prompt needs a model. Retry when the backend is reachable for a full specification.']
+        : [],
     recommendations: recommendationsFor(gaps, compressed.length < original.length),
   };
 }

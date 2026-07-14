@@ -1,4 +1,12 @@
-import { AdapterError, FORMATS, type ModelResult, type PromptFormat, type Variation } from './types';
+import {
+  AdapterError,
+  FORMATS,
+  TASK_TYPES,
+  type ModelResult,
+  type PromptFormat,
+  type TaskType,
+  type Variation,
+} from './types';
 
 /**
  * Models routinely wrap JSON in code fences or prepend "Here you go:" despite
@@ -33,6 +41,19 @@ export function extractJson(raw: string): unknown {
 
 function isFormat(value: unknown): value is PromptFormat {
   return typeof value === 'string' && (FORMATS as readonly string[]).includes(value);
+}
+
+function isTaskType(value: unknown): value is TaskType {
+  return typeof value === 'string' && (TASK_TYPES as readonly string[]).includes(value);
+}
+
+/** Coerce a possibly-missing array of strings into a clean list. */
+function stringList(value: unknown, limit: number): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    .map((item) => item.trim())
+    .slice(0, limit);
 }
 
 /**
@@ -113,13 +134,14 @@ export function validateModelResult(parsed: unknown, expectedVariations: number)
     throw new AdapterError('Model returned no usable rewrite', 'bad_response', true);
   }
 
-  const recommendations = Array.isArray(record.recommendations)
-    ? record.recommendations
-        .filter((r): r is string => typeof r === 'string' && r.trim().length > 0)
-        .map((r) => r.trim())
-        .slice(0, 5)
-    : [];
-
   // Asking for 3 and getting 2 is a quality dip, not a failure — serve it.
-  return { variations: variations.slice(0, expectedVariations), recommendations };
+  // Likewise a missing taskType or assumptions list degrades the UI slightly but
+  // does not make the rewrite unusable, so these default rather than throw.
+  return {
+    taskType: isTaskType(record.taskType) ? record.taskType : 'other',
+    variations: variations.slice(0, expectedVariations),
+    assumptions: stringList(record.assumptions, 12),
+    openQuestions: stringList(record.openQuestions, 8),
+    recommendations: stringList(record.recommendations, 5),
+  };
 }

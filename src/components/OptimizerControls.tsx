@@ -1,4 +1,4 @@
-import { LENGTH_MODES, TONES, type LengthMode, type OptimizeOptions, type Tone } from '../../shared/types';
+import { INTENSITIES, TONES, type Intensity, type OptimizeOptions, type Tone } from '../../shared/types';
 import { cn } from '../lib/utils';
 
 const TONE_LABELS: Record<Tone, string> = {
@@ -11,10 +11,19 @@ const TONE_LABELS: Record<Tone, string> = {
   academic: 'Academic',
 };
 
-const LENGTH_LABELS: Record<LengthMode, string> = {
-  shorten: 'Shorten',
-  preserve: 'Preserve',
-  expand: 'Expand',
+const INTENSITY_LABELS: Record<Intensity, { label: string; hint: string }> = {
+  compress: {
+    label: 'Compress',
+    hint: 'Same prompt, fewer tokens. For prompts that already work.',
+  },
+  balanced: {
+    label: 'Balanced',
+    hint: 'Same length, sharper. Fixes ambiguity and structure.',
+  },
+  engineer: {
+    label: 'Engineer',
+    hint: 'Builds a full specification: role, assumptions, tasks, deliverables, verification. Expect it to get much longer.',
+  },
 };
 
 interface Props {
@@ -25,64 +34,65 @@ interface Props {
 
 export function OptimizerControls({ options, disabled, onChange }: Props) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <label className="flex flex-col gap-1.5">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Tone</span>
-        <select
-          value={options.tone}
-          disabled={disabled}
-          onChange={(e) => onChange({ ...options, tone: e.target.value as Tone })}
-          className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
-        >
-          {TONES.map((tone) => (
-            <option key={tone} value={tone}>
-              {TONE_LABELS[tone]}
-            </option>
-          ))}
-        </select>
-      </label>
-
+    <div className="space-y-4">
       <div className="flex flex-col gap-1.5">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Length</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Intensity</span>
         <div className="flex rounded-lg border border-slate-200 overflow-hidden bg-slate-50">
-          {LENGTH_MODES.map((mode) => (
+          {INTENSITIES.map((mode) => (
             <button
               key={mode}
               type="button"
               disabled={disabled}
-              onClick={() => onChange({ ...options, length: mode })}
+              title={INTENSITY_LABELS[mode].hint}
+              onClick={() => onChange({ ...options, intensity: mode })}
               className={cn(
                 'flex-1 px-2 py-2 text-xs font-medium transition-colors disabled:opacity-50',
-                options.length === mode
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-600 hover:bg-slate-100',
+                options.intensity === mode ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100',
               )}
             >
-              {LENGTH_LABELS[mode]}
+              {INTENSITY_LABELS[mode].label}
             </button>
           ))}
         </div>
+        <p className="text-xs text-slate-500 leading-relaxed">{INTENSITY_LABELS[options.intensity].hint}</p>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Variations</span>
-        <div className="flex rounded-lg border border-slate-200 overflow-hidden bg-slate-50">
-          {[1, 2, 3].map((count) => (
-            <button
-              key={count}
-              type="button"
-              disabled={disabled}
-              onClick={() => onChange({ ...options, variations: count })}
-              className={cn(
-                'flex-1 px-2 py-2 text-xs font-medium transition-colors disabled:opacity-50',
-                options.variations === count
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-600 hover:bg-slate-100',
-              )}
-            >
-              {count}
-            </button>
-          ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <label className="flex flex-col gap-1.5">
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Tone</span>
+          <select
+            value={options.tone}
+            disabled={disabled}
+            onChange={(e) => onChange({ ...options, tone: e.target.value as Tone })}
+            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+          >
+            {TONES.map((tone) => (
+              <option key={tone} value={tone}>
+                {TONE_LABELS[tone]}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <div className="flex flex-col gap-1.5">
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Variations</span>
+          <div className="flex rounded-lg border border-slate-200 overflow-hidden bg-slate-50">
+            {[1, 2, 3].map((count) => (
+              <button
+                key={count}
+                type="button"
+                disabled={disabled}
+                title={count > 1 ? 'Each variation uses a different strategy, not just different wording.' : undefined}
+                onClick={() => onChange({ ...options, variations: count })}
+                className={cn(
+                  'flex-1 px-2 py-2 text-xs font-medium transition-colors disabled:opacity-50',
+                  options.variations === count ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100',
+                )}
+              >
+                {count}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

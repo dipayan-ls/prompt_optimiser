@@ -81,7 +81,7 @@ describe('ruleBasedOptimize', () => {
   it('picks JSON for API-shaped prompts', () => {
     const result = ruleBasedOptimize(
       'Build an endpoint. Return a payload. Validate the schema.',
-      options({ length: 'expand' }),
+      options({ intensity: 'engineer' }),
     );
     expect(result.variations[0].optimizedFormat).toBe('JSON');
     expect(() => JSON.parse(result.variations[0].optimizedPrompt)).not.toThrow();
@@ -90,7 +90,7 @@ describe('ruleBasedOptimize', () => {
   it('emits plain text when asked to shorten', () => {
     const result = ruleBasedOptimize(
       'In order to help. Please note that this matters. Do a thing.',
-      options({ length: 'shorten' }),
+      options({ intensity: 'compress' }),
     );
     expect(result.variations[0].optimizedFormat).toBe('Text');
     expect(result.variations[0].optimizedPrompt).not.toContain('In order to');
@@ -99,7 +99,7 @@ describe('ruleBasedOptimize', () => {
   it('structures multi-instruction prompts as XML', () => {
     const result = ruleBasedOptimize(
       'Research the market.\nIdentify three competitors.\nSummarize their pricing.',
-      options({ length: 'expand' }),
+      options({ intensity: 'engineer' }),
     );
     expect(result.variations[0].optimizedFormat).toBe('XML');
     expect(result.variations[0].optimizedPrompt).toContain('<instructions>');

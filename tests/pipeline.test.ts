@@ -9,9 +9,12 @@ import {
 } from '../shared/types';
 
 const RESULT: ModelResult = {
+  taskType: 'writing',
   variations: [
     { optimizedPrompt: 'You are a senior editor. Rewrite the passage below.', optimizedFormat: 'Text', rationale: 'Added a role.' },
   ],
+  assumptions: ['Assumed the audience is a general reader.'],
+  openQuestions: [],
   recommendations: ['Add a role.'],
 };
 
@@ -25,9 +28,11 @@ function request(overrides: Partial<OptimizeRequest> = {}): OptimizeRequest {
 }
 
 describe('parseRequest', () => {
-  it('applies defaults for missing options', () => {
+  // Engineer is the default deliberately: it is what the tool is for. A default
+  // of "balanced" is what made rewrites come back as tidied summaries.
+  it('defaults to engineer intensity', () => {
     const parsed = parseRequest({ prompt: 'hello world' });
-    expect(parsed).toMatchObject({ tone: 'neutral', length: 'preserve', variations: 1 });
+    expect(parsed).toMatchObject({ tone: 'neutral', intensity: 'engineer', variations: 1 });
   });
 
   it('rejects an empty prompt', () => {
@@ -55,10 +60,16 @@ describe('parseRequest', () => {
     expect(parseRequest({ prompt: 'x', variations: 'abc' }).variations).toBe(1);
   });
 
-  it('falls back to defaults for unknown tone and length', () => {
-    const parsed = parseRequest({ prompt: 'x', tone: 'pirate', length: 'infinite' });
+  it('falls back to defaults for unknown tone and intensity', () => {
+    const parsed = parseRequest({ prompt: 'x', tone: 'pirate', intensity: 'infinite' });
     expect(parsed.tone).toBe('neutral');
-    expect(parsed.length).toBe('preserve');
+    expect(parsed.intensity).toBe('engineer');
+  });
+
+  it('accepts each valid intensity', () => {
+    for (const intensity of ['compress', 'balanced', 'engineer'] as const) {
+      expect(parseRequest({ prompt: 'x', intensity }).intensity).toBe(intensity);
+    }
   });
 });
 

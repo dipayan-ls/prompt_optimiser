@@ -3,7 +3,10 @@ import { extractJson, looksLikeGibberish, validateModelResult, violatesSafety } 
 import { AdapterError } from '../shared/types';
 
 const good = {
+  taskType: 'writing',
   variations: [{ optimizedPrompt: 'You are a senior editor. Rewrite the text below.', optimizedFormat: 'Text', rationale: 'Added a role.' }],
+  assumptions: ['Assumed a general audience.'],
+  openQuestions: ['What word count is expected?'],
   recommendations: ['Add a role.', 'Specify the format.', 'State constraints.'],
 };
 
@@ -71,6 +74,29 @@ describe('validateModelResult', () => {
     const result = validateModelResult(good, 1);
     expect(result.variations).toHaveLength(1);
     expect(result.recommendations).toHaveLength(3);
+    expect(result.taskType).toBe('writing');
+    expect(result.assumptions).toEqual(['Assumed a general audience.']);
+    expect(result.openQuestions).toEqual(['What word count is expected?']);
+  });
+
+  it('defaults an unknown taskType to "other" rather than failing', () => {
+    expect(validateModelResult({ ...good, taskType: 'astrology' }, 1).taskType).toBe('other');
+    expect(validateModelResult({ ...good, taskType: undefined }, 1).taskType).toBe('other');
+  });
+
+  // A missing assumptions list costs a UI panel, not the rewrite — degrade, don't throw.
+  it('tolerates missing assumptions and openQuestions', () => {
+    const result = validateModelResult(
+      { taskType: 'writing', variations: good.variations, recommendations: good.recommendations },
+      1,
+    );
+    expect(result.assumptions).toEqual([]);
+    expect(result.openQuestions).toEqual([]);
+  });
+
+  it('drops blank and non-string entries from assumptions', () => {
+    const result = validateModelResult({ ...good, assumptions: ['  real  ', '', '   ', 42, null] }, 1);
+    expect(result.assumptions).toEqual(['real']);
   });
 
   it('defaults an unknown format to Text', () => {

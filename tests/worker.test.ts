@@ -35,9 +35,12 @@ function groqReply(content: unknown) {
 }
 
 const MODEL_OUTPUT = {
+  taskType: 'writing',
   variations: [
     { optimizedPrompt: 'You are a senior copywriter. Draft a post about cats.', optimizedFormat: 'Text', rationale: 'Added a role.' },
   ],
+  assumptions: ['Assumed the audience is cat owners, not veterinarians.'],
+  openQuestions: [],
   recommendations: ['Add a role.', 'Name the audience.', 'Specify length.'],
 };
 

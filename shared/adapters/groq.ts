@@ -1,4 +1,4 @@
-import { systemPrompt, userPrompt } from '../prompt';
+import { maxOutputTokens, systemPrompt, userPrompt } from '../prompt';
 import { AdapterError, type ModelAdapter, type ModelResult, type OptimizeOptions } from '../types';
 import { extractJson, validateModelResult } from '../validate';
 import { postJson } from './http';
@@ -27,7 +27,7 @@ export class GroqAdapter implements ModelAdapter {
           { role: 'user', content: userPrompt(prompt, options) },
         ],
         temperature: options.variations > 1 ? 0.7 : 0.3,
-        max_tokens: 4096,
+        max_tokens: maxOutputTokens(options),
         response_format: { type: 'json_object' },
       },
       { Authorization: `Bearer ${this.apiKey}` },

@@ -1,4 +1,4 @@
-import { systemPrompt, userPrompt } from '../prompt';
+import { maxOutputTokens, systemPrompt, userPrompt } from '../prompt';
 import { AdapterError, type ModelAdapter, type ModelResult, type OptimizeOptions } from '../types';
 import { extractJson, validateModelResult } from '../validate';
 import { postJson } from './http';
@@ -29,7 +29,12 @@ export class OllamaAdapter implements ModelAdapter {
         ],
         format: 'json',
         stream: false,
-        options: { temperature: options.variations > 1 ? 0.7 : 0.3 },
+        options: {
+          temperature: options.variations > 1 ? 0.7 : 0.3,
+          // Ollama defaults num_predict to 128 tokens, which truncates an
+          // engineered spec into invalid JSON. Match the other adapters.
+          num_predict: maxOutputTokens(options),
+        },
       },
       {},
       signal,
