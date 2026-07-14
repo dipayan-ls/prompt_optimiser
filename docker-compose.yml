@@ -1,0 +1,31 @@
+# Local model backend for development.
+#
+# This is a DEV-ONLY convenience. It is not how the hosted site runs: GitHub
+# Pages serves static files and cannot run a model, and a visitor's browser
+# cannot reach this container. Production uses the Cloudflare Worker — see README.
+#
+#   docker compose up -d      # start Ollama
+#   make ollama-pull          # pull the model (first run only, ~4.7GB)
+#
+# Then point the Worker at it:
+#   echo 'MODEL_BACKEND="ollama"' >> .dev.vars
+#   echo 'OLLAMA_BASE_URL="http://host.docker.internal:11434"' >> .dev.vars
+#   npm run worker
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: prompt-optimiser-ollama
+    ports:
+      - '11434:11434'
+    volumes:
+      - ollama-models:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'ollama list || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  ollama-models:

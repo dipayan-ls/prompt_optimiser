@@ -34,10 +34,10 @@ export function MethodologyAccordion() {
                 The Science of Prompting
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed pl-3 border-l-2 border-slate-100">
-                We don't just rewrite your text; we engineer it. Using Gemini 3.1 Pro's high-level thinking capabilities,
-                we analyze your intent and restructure it using proven techniques like Chain-of-Thought, XML scaffolding,
-                and constraint layering. The result is a prompt that costs up to <strong>55% less in tokens</strong> while
-                delivering significantly better AI performance.
+                We don't just rewrite your text; we engineer it. We analyze your intent and restructure it
+                using proven techniques like Chain-of-Thought, XML scaffolding, and constraint layering.
+                Token counts are measured with a real tokenizer, not estimated, so the savings you see are
+                the savings you get. No API key needed, and your prompts are never stored.
               </p>
             </div>
 
@@ -62,7 +62,11 @@ export function MethodologyAccordion() {
                 </div>
                 <div className="flex gap-3 text-sm text-slate-600 items-start">
                   <div className="w-5 h-5 shrink-0 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-semibold text-xs mt-0.5">4</div>
-                  <p><strong>Copy & Deploy:</strong> Take your token-efficient prompt and deploy it in Claude, ChatGPT, or Gemini.</p>
+                  <p><strong>Refine (Optional):</strong> Not quite right? Describe what to change and refine the result.</p>
+                </div>
+                <div className="flex gap-3 text-sm text-slate-600 items-start">
+                  <div className="w-5 h-5 shrink-0 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-semibold text-xs mt-0.5">5</div>
+                  <p><strong>Copy & Deploy:</strong> Take your token-efficient prompt into whichever assistant you use.</p>
                 </div>
               </div>
             </div>

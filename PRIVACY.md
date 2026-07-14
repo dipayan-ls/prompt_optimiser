@@ -1,32 +1,38 @@
 # Privacy Policy for PromptCraft Optimizer
 
-**Last Updated:** April 2026
+**Last Updated:** July 2026
 
-PromptCraft Optimizer ("we", "our", or "the tool") is designed as a developer utility to optimize language model prompts. This Privacy Policy details how data is handled when you use the open-source tool.
+PromptCraft Optimizer ("the tool") is a developer utility by **Dipayan** for optimizing language model prompts. This policy describes how data is handled.
 
-## 1. Information Collection & Usage
+## 1. What happens to your prompt
 
-### 1.1 No Centralized Data Collection
-PromptCraft Optimizer is a client-side (frontend) application hosted statically via GitHub Pages. We do not operate a backend database, nor do we track, collect, or store your personal identity, IP address, or raw prompt text on our proprietary servers.
+When you click "Analyze & Optimize", your prompt is sent from your browser to our optimizer service (a Cloudflare Worker), which forwards it to a model provider to produce the rewrite, then returns the result.
 
-### 1.2 Prompt Text & Third-Party APIs
-When you click "Analyze & Optimize", the prompt text and any uploaded context files are sent directly from your browser to **Google's Gemini API** (Google GenAI). 
-- Your prompts are governed by [Google's API Terms of Service and Privacy Policy](https://policies.google.com/privacy). 
-- We highly recommend not submitting highly sensitive, proprietary, or personally identifiable information (PII) into the prompt input field.
+- **Your prompt is never written to disk, logged, or stored.** It exists only in memory for the duration of the request. Responses are served with `Cache-Control: no-store`.
+- **No account, no API key, no tracking.** We do not collect your identity, set cookies, or run analytics.
+- Your IP address is visible to Cloudflare in transit and is used only for transient, in-memory rate limiting. It is not persisted by us.
+- The model provider processes your prompt under its own terms. Avoid pasting secrets, credentials, or personal data into any prompt — here or anywhere else.
 
-### 1.3 Telemetry & Meta-Data Storage (GitHub Integration)
-To help us improve the tool, PromptCraft Optimizer automatically extracts high-level "prompt engineering recommendations" (e.g., "Use XML tagging here") and appends them to a public `recommendations.md` file in our public GitHub repository. 
-- **What is saved:** Only the generalized strategic advice (Recommendations) and the filename/title of your prompt. 
-- **What is NOT saved:** Your raw text, context documents, or optimized outputs are **never** synced to this public repository.
+If the model provider is unavailable or rate-limited, the tool falls back to a rule-based optimizer that runs entirely in your browser. In that mode your prompt never leaves your device at all. The UI tells you when this happens.
 
-## 2. Local Usage & Forking
-If you self-host or run PromptCraft Optimizer locally:
-- You are responsible for using your own Google Gemini API key.
-- You have total control over the GitHub repository connection via the `VITE_GITHUB_TOKEN` environment variable. If you do not configure this, no data will be transmitted out of your local machine other than the direct API request to Google Gemini.
+## 2. What we removed
 
-## 3. Changes to this Policy
-As this is an open-source project, usage tracking features may evolve. Any changes to data handling will be documented transparently in this file and tracked via Git version history.
+Earlier versions of this tool automatically committed prompt-engineering recommendations, along with your prompt's filename, to a **public** `recommendations.md` file on GitHub. That happened on every analysis, without consent or an opt-out.
+
+**That feature has been removed entirely.** Nothing is written to any repository. Entries committed by previous versions remain in the repository's Git history.
+
+Earlier versions also embedded API credentials in the public JavaScript bundle. That has been fixed: all secrets now live server-side in the Worker and are never sent to the browser.
+
+## 3. Local usage & forking
+
+Run it locally with `MODEL_BACKEND=ollama` and nothing leaves your machine — the model runs on your own hardware. See the README.
+
+Build with `VITE_API_BASE=""` and the tool runs fully offline in the browser using the rule-based optimizer, with no network calls at all.
+
+## 4. Changes to this policy
+
+This is an open-source project. Any change to data handling will be reflected here and is auditable in the Git history.
 
 ---
 
-**Contact:** If you have questions about how data flows through this application, please open an Issue on the GitHub repository.
+**Contact:** Open an issue on the GitHub repository.

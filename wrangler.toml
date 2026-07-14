@@ -1,0 +1,21 @@
+name = "prompt-optimiser-api"
+main = "worker/index.ts"
+compatibility_date = "2024-11-01"
+
+# Workers AI. Free daily allocation, no third-party key — this is the secondary
+# backend when Groq is rate-limited. Comment out to disable.
+[ai]
+binding = "AI"
+
+[vars]
+# auto | groq | workers-ai | ollama | rule-based
+# `auto` (the default when unset) tries Groq, then Workers AI, then the
+# deterministic optimizer.
+MODEL_BACKEND = "auto"
+GROQ_MODEL = "llama-3.3-70b-versatile"
+ALLOWED_ORIGINS = "https://dipayan.shop,http://localhost:3000"
+RATE_LIMIT_PER_MINUTE = "12"
+
+# GROQ_API_KEY is NOT set here — [vars] is plaintext and committed to git.
+# Set it as an encrypted secret instead:
+#   npx wrangler secret put GROQ_API_KEY
