@@ -51,11 +51,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Build
-        # VITE_API_BASE is public config, not a secret — it is simply the URL the
-        # browser calls. A repo *variable* is its honest home; using a secret here
-        # would imply a confidentiality this value cannot have.
+        # VITE_API_BASE is public config, not a secret — it is just the URL the
+        # browser calls, and it ships in the bundle either way. It is defaulted
+        # here rather than left to a repo variable so that a fresh clone deploys
+        # working: a missing variable used to fall back to "/api", which silently
+        # POSTs to GitHub Pages and 405s.
+        #
+        # Override with a repo *variable* (Settings → Secrets and variables →
+        # Actions → Variables) if the Worker ever moves — e.g. to "/api" once
+        # dipayan.shop is behind Cloudflare and can route the path same-origin.
+        # A secret will NOT work here: ${{ vars.* }} cannot read secrets.
         env:
-          VITE_API_BASE: ${{ vars.VITE_API_BASE || '/api' }}
+          VITE_API_BASE: ${{ vars.VITE_API_BASE || 'https://prompt-optimiser-api.prompttokenoptimizer.workers.dev' }}
         run: npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v4
