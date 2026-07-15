@@ -206,7 +206,7 @@ export default function App() {
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-xl font-semibold tracking-tight">Prompt Optimizer</h1>
+            <h1 className="text-xl font-semibold tracking-tight">Prompt Optimiser</h1>
           </div>
           <div className="text-sm font-medium text-slate-500 flex items-center gap-1.5">
             <Sparkles className="w-4 h-4 text-blue-500" /> by Dipayan
