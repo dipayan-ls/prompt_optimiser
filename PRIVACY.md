@@ -1,8 +1,8 @@
-# Privacy Policy for PromptCraft Optimizer
+# Privacy Policy for Prompt Optimiser
 
 **Last Updated:** July 2026
 
-PromptCraft Optimizer ("the tool") is a developer utility by **Dipayan** for optimizing language model prompts. This policy describes how data is handled.
+Prompt Optimiser ("the tool") is a developer utility by **Dipayan** for optimizing language model prompts. This policy describes how data is handled.
 
 ## 1. What happens to your prompt
 

@@ -1,6 +1,6 @@
 # MIT License with Local-Use IP terms
 
-**Copyright (c) 2026 PromptCraft Optimizer Contributors**
+**Copyright (c) 2026 Prompt Optimiser Contributors**
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -13,7 +13,7 @@ furnished to do so, subject to the following conditions:
 copies or substantial portions of the Software.
 
 ### Intellectual Property & Local-Use Terms
-2. **Open Source Guarantee:** The PromptCraft Optimizer codebase is provided as an open tool for the developer community.
+2. **Open Source Guarantee:** The Prompt Optimiser codebase is provided as an open tool for the developer community.
 3. **Local Use & Forking:** You are fully permitted to run this application locally, fork the repository, and modify the source code for personal, internal, or commercial internal use.
 4. **Data Ownership:** You retain full intellectual property rights to any prompts you generate through your local or hosted version of this tool. The Software does not claim ownership over user-generated input or optimized outputs.
 5. **No Commercial SaaS Resale:** While the code is open for modification and local usage, you may not repackage this application in its entirety and resell it as a white-labeled commercial Software-as-a-Service (SaaS) without explicit written consent from the original authors.

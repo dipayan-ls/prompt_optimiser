@@ -1,4 +1,4 @@
-# PromptCraft Optimizer
+# Prompt Optimiser
 
 **An independent prompt optimization tool by Dipayan.**
 Live at **[dipayan.shop/prompt_optimiser](https://dipayan.shop/prompt_optimiser/)**

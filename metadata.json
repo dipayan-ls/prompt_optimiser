@@ -1,5 +1,5 @@
 {
-  "name": "PromptCraft Optimizer",
+  "name": "Prompt Optimiser",
   "description": "Analyze and optimize prompts for minimal token usage across ChatGPT, Claude, and other assistants. No API key required. By Dipayan.",
   "requestFramePermissions": []
 }

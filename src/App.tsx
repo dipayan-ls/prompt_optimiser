@@ -302,8 +302,6 @@ export default function App() {
 
         {/* Center: input + controls */}
         <div className="flex-1 min-w-[400px] flex flex-col h-full overflow-hidden">
-          <MethodologyAccordion />
-
           <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
             {activeItem ? (
               <div className="flex-1 overflow-y-auto p-6">
@@ -374,6 +372,8 @@ export default function App() {
                         </button>
                       </div>
                     )}
+
+                    <MethodologyAccordion />
                   </div>
                 </div>
               </div>
